@@ -36,6 +36,10 @@ lint-fix: ## Run clippy lint and fix (must be committed)
 lint-fix-force: ## Run clippy lint forced in staging
 	cargo clippy --fix --allow-dirty
 
+validate:
+	@make lint
+	@make test
+
 ##@ Clean
 clean: ## Remove useless files
 	rm -r cargo-test-*.profraw
