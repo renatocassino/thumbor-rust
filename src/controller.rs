@@ -2,11 +2,12 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use actix_web::HttpRequest;
+use actix_web::cookie::time::Instant;
 use opencv::prelude::MatTraitConstManual; // to get method `.size()` must have this use
 use opencv::{core::{Mat}};
 use opencv::core::Vector;
 use crate::calc;
-use actix_web::{get, web::{self}, App, HttpServer, HttpResponse};
+use actix_web::{get, web::{self}, HttpResponse};
 
 #[get("/hello/{name}")]
 pub async fn greet(name: web::Path<String>) -> HttpResponse {
@@ -17,7 +18,6 @@ pub async fn greet(name: web::Path<String>) -> HttpResponse {
 
 async fn load_image_from_url(filename: &mut String) -> Result<Mat, Box<dyn std::error::Error>> {
     if filename.starts_with("http://") || filename.starts_with("https://") {
-        println!("Reqwesting... {}", filename);
         let resp = reqwest::get(filename.to_string()).await?;
         if resp.status().is_success() {
             let image_data = resp.bytes().await?.to_vec();
@@ -25,16 +25,24 @@ async fn load_image_from_url(filename: &mut String) -> Result<Mat, Box<dyn std::
             let img = opencv::imgcodecs::imdecode(&mut mat, opencv::imgcodecs::IMREAD_COLOR)?;
             return Ok(img);
         }
-        *filename = String::from("big.jpg");
     }
     Ok(Mat::default())
 }
 
-// Função para carregar uma imagem a partir de um arquivo local
 fn load_image_from_file(filename: &str) -> Result<Mat, opencv::Error> {
     let path = format!("./src/images/{}", filename);
     let img = opencv::imgcodecs::imread(&path, opencv::imgcodecs::IMREAD_COLOR)?;
     Ok(img)
+}
+
+pub async fn get_image(filename: &str)-> Mat {
+    if filename.starts_with("http://") || filename.starts_with("https://") {
+        let img = load_image_from_url(&mut filename.to_string()).await.unwrap();
+        return img;
+    }
+
+    let img = load_image_from_file(filename).unwrap();
+    return img;
 }
 
 #[get("/{key}/{width:\\d+}x{height:\\d+}/{smart:(smart/)?}{filename:.*}")]
@@ -45,12 +53,7 @@ pub async fn file_cv(req: HttpRequest) -> HttpResponse {
     let _smart: bool = req.match_info().get("smart").unwrap() == "smart/";
     let filename = req.match_info().get("filename").unwrap();
 
-    let mut img = Mat::default();
-    if filename.starts_with("http://") || filename.starts_with("https://") {
-        img = load_image_from_url(&mut filename.to_string()).await.unwrap();
-    } else {
-        img = load_image_from_file(filename).unwrap();
-    }
+    let img = get_image(filename).await;
 
     let original_size = img.size().unwrap();
     let new_size = opencv::core::Size { width: width, height: height };
