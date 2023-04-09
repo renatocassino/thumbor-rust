@@ -23,17 +23,17 @@ pub async fn file_cv(req: HttpRequest) -> HttpResponse {
     let img = get_image(filename).await;
 
     let original_size = img.size().unwrap();
-    let new_size = opencv::core::Size { width: width, height: height };
+    let new_size = opencv::core::Size { width, height };
     let new_size_with_aspect = calc::get_new_size_respecting_aspect_ratio(original_size, new_size);
 
     let mut resized_image = Mat::default();
     opencv::imgproc::resize(&img, &mut resized_image, new_size_with_aspect, 0.0, 0.0, opencv::imgproc::INTER_AREA).unwrap();
 
     let cropped_image = Mat::roi(&resized_image, opencv::core::Rect {
-        x: ((new_size_with_aspect.width - width) / 2) as i32,
-        y: ((new_size_with_aspect.height - height) / 2) as i32,
-        width: width,
-        height: height,
+        x: ((new_size_with_aspect.width - width) / 2),
+        y: ((new_size_with_aspect.height - height) / 2),
+        width,
+        height,
     }).unwrap();
 
     let mut out_vector: Vector<u8> = Vector::new();

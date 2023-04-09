@@ -31,13 +31,14 @@ pub fn get_new_size_respecting_aspect_ratio(original_size: opencv::core::Size, n
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pretty_assertions::assert_eq; // crate for test-only use. Cannot be used in non-test code.
 
     #[test]
     fn test_get_aspect_ratio() {
         assert_eq!(get_aspect_ratio(100, 100), 1.0);
         assert_eq!(get_aspect_ratio(100, 50), 2.0);
         assert_eq!(get_aspect_ratio(50, 100), 0.5);
-        assert_eq!(get_aspect_ratio(3456, 5184), 0.6666666666666666);
+        assert_eq!(get_aspect_ratio(3456, 5184), 0.666_666_7);
     }
 
     #[test]

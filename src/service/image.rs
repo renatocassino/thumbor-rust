@@ -5,8 +5,8 @@ async fn load_image_from_url(filename: &mut String) -> Result<Mat, Box<dyn std::
         let resp = reqwest::get(filename.to_string()).await?;
         if resp.status().is_success() {
             let image_data = resp.bytes().await?.to_vec();
-            let mut mat = Mat::from_slice(&image_data)?;
-            let img = opencv::imgcodecs::imdecode(&mut mat, opencv::imgcodecs::IMREAD_COLOR)?;
+            let mat = Mat::from_slice(&image_data)?;
+            let img = opencv::imgcodecs::imdecode(&mat, opencv::imgcodecs::IMREAD_COLOR)?;
             return Ok(img);
         }
     }
@@ -25,6 +25,5 @@ pub async fn get_image(filename: &str)-> Mat {
         return img;
     }
 
-    let img = load_image_from_file(filename).unwrap();
-    return img;
+    load_image_from_file(filename).unwrap()
 }
