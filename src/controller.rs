@@ -5,13 +5,6 @@ use opencv::core::Vector;
 use crate::{calc, service::image::get_image};
 use actix_web::{get, web::{self}, HttpResponse};
 
-#[get("/hello/{name}")]
-pub async fn greet(name: web::Path<String>) -> HttpResponse {
-    HttpResponse::Ok()
-        .append_header(("Content-Type", "text/html"))
-        .body(format!("Hello {}!", name))
-}
-
 #[get("/{key}/{width:\\d+}x{height:\\d+}/{smart:(smart/)?}{filename:.*}")]
 pub async fn file_cv(req: HttpRequest) -> HttpResponse {
     let _key = req.match_info().get("key").unwrap();

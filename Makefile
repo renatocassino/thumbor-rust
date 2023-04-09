@@ -44,3 +44,10 @@ validate:
 clean: ## Remove useless files
 	rm -r cargo-test-*.profraw
 	rm -r target/debug/coverage
+
+##@ Project runner
+run: ## Start the project
+	cargo run
+
+run-watch: ## Run with watcher
+	cargo watch -x run
