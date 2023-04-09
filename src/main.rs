@@ -21,21 +21,15 @@ struct QueryParams {
 
 #[get("/file/{name}")]
 async fn file(name: web::Path<String>, params: web::Query<QueryParams>) -> HttpResponse {
-    let path = "./src/images/sun.jpg";
+    let path = "./src/images/big.jpg";
     let file = File::open(path).unwrap();
 
     let mut buf_reader = BufReader::new(file);
     let mut contents = Vec::new();
     buf_reader.read_to_end(&mut contents).unwrap();
 
-    // crop image to 300 x 200
-    let mut img = image::load_from_memory(&contents).unwrap();
-    let (width, height) = img.dimensions();
-    
-    println!("width: {}, height: {}", width, height);
-    println!("{:?}", img.color());
-
-    let cropped_image = img.crop(0, 0, params.w.try_into().unwrap(), params.h.try_into().unwrap());
+    let img = image::load_from_memory(&contents).unwrap();
+    let cropped_image = img.resize_to_fill(params.w.try_into().unwrap(), params.h.try_into().unwrap(), image::imageops::FilterType::Gaussian);
     cropped_image.save("sun-cropped.jpg").unwrap();
 
     let file2 = File::open("sun-cropped.jpg").unwrap();
@@ -50,7 +44,7 @@ async fn file(name: web::Path<String>, params: web::Query<QueryParams>) -> HttpR
 
 #[get("/file-cv/{name}")]
 async fn file_cv(name: web::Path<String>, params: web::Query<QueryParams>) -> HttpResponse {
-    let path = "./src/images/sun.jpg";
+    let path = "./src/images/big.jpg";
     let mut img = opencv::imgcodecs::imread(
         path,
         opencv::imgcodecs::IMREAD_COLOR,
