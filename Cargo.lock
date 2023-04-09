@@ -278,6 +278,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.70"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7de8ce5e0f9f8d88245311066a578d72b7af3e7088f32783804676302df237e4"
+
+[[package]]
 name = "askama_escape"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2655,6 +2661,7 @@ version = "0.1.0"
 dependencies = [
  "actix-files",
  "actix-web",
+ "anyhow",
  "base64",
  "cargo-watch",
  "hmac",
@@ -2664,6 +2671,7 @@ dependencies = [
  "reqwest",
  "serde",
  "sha1",
+ "thiserror",
 ]
 
 [[package]]
