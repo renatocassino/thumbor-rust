@@ -2,16 +2,22 @@ use actix_web::HttpRequest;
 use opencv::prelude::MatTraitConstManual; // to get method `.size()` must have this use
 use opencv::{core::{Mat}};
 use opencv::core::Vector;
+use crate::security;
+use crate::settings::conf;
 use crate::{calc, service::image::get_image};
-use actix_web::{get, web::{self}, HttpResponse};
+use actix_web::{get, HttpResponse};
 
 #[get("/{key}/{width:\\d+}x{height:\\d+}/{smart:(smart/)?}{filename:.*}")]
-pub async fn file_cv(req: HttpRequest) -> HttpResponse {
-    let _key = req.match_info().get("key").unwrap();
+pub async fn file_cv(req: HttpRequest) -> Result<HttpResponse, actix_web::Error> {
+    let key = req.match_info().get("key").unwrap();
     let width = req.match_info().get("width").unwrap().parse::<i32>().unwrap();
     let height = req.match_info().get("height").unwrap().parse::<i32>().unwrap();
     let _smart: bool = req.match_info().get("smart").unwrap() == "smart/";
     let filename = req.match_info().get("filename").unwrap();
+
+    if !security::is_valid_key(req.uri().to_string()) {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
 
     let img = get_image(filename).await;
 
@@ -32,7 +38,7 @@ pub async fn file_cv(req: HttpRequest) -> HttpResponse {
     let mut out_vector: Vector<u8> = Vector::new();
     opencv::imgcodecs::imencode(".jpg", &cropped_image, &mut out_vector, &Vector::new()).expect("Encode image");
 
-    HttpResponse::Ok()
+    Ok(HttpResponse::Ok()
         .append_header(("Content-Type", "image/jpeg"))
-        .body(out_vector.to_vec())
+        .body(out_vector.to_vec()))
 }
