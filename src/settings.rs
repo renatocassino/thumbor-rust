@@ -47,3 +47,34 @@ thread_local! {
 pub fn conf() -> Arc<Settings> {
     Settings::current()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_settings() {
+        Settings::start();
+        let conf = Settings::current();
+        assert_eq!(conf.debug, false);
+        assert_eq!(conf.secret_key, "");
+    }
+
+    #[test]
+    fn test_settings_from_file() {
+        let conf = Settings::current();
+
+        Settings {
+            secret_key: "ANY_KEY".to_string(),
+            debug: true,
+            ..Default::default()
+        }.make_current();
+        let new_conf = Settings::current();
+
+        assert_eq!(conf.debug, false);
+        assert_eq!(conf.secret_key, "");
+
+        assert_eq!(new_conf.debug, true);
+        assert_eq!(new_conf.secret_key, "ANY_KEY");
+    }
+}

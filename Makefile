@@ -20,6 +20,8 @@ install-mac: ## Install core dependencies in mac
 	rustup component add llvm-tools-preview
 
 	brew install opencv
+	brew install grcov
+	brew install grc
 
 	echo "Install http-serve to see coverage"
 	npm i -g http-serve
