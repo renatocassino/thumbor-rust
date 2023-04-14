@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate lazy_static;
 
 use thumbor_rust::{controller, settings::{conf, Settings}};

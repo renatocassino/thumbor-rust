@@ -1,9 +1,14 @@
 use std::sync::{Arc, RwLock};
 
 use config::{Config, ConfigError, File};
+use lazy_static::lazy_static;
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize, Default)]
+lazy_static! {
+    pub static ref CONF_S: Settings = Settings::from_file().unwrap();
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
 #[allow(unused)]
 pub struct Settings {
     pub debug: bool,
@@ -30,8 +35,8 @@ impl Settings {
     }
 
     pub fn start() {
-        let config = Settings::from_file().unwrap();
-        CONF.with(|c| *c.write().unwrap() = Arc::new(config));
+        let current_conf: Settings = CONF_S.clone();
+        CONF.with(|c| *c.write().unwrap() = Arc::new(current_conf));
     }
 }
 
