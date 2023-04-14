@@ -15,6 +15,15 @@ install: ## Install core dependencies to run the project
 	echo "Install http-serve to see coverage"
 	npm i -g http-serve
 
+install-mac: ## Install core dependencies in mac
+	echo "Installing rustup llvm-tools-preview"
+	rustup component add llvm-tools-preview
+
+	brew install opencv
+
+	echo "Install http-serve to see coverage"
+	npm i -g http-serve
+
 ##@ Code quality
 test: ## Run tests
 	cargo test
