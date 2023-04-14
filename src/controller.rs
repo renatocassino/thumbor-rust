@@ -3,13 +3,14 @@ use opencv::prelude::MatTraitConstManual; // to get method `.size()` must have t
 use opencv::{core::{Mat}};
 use opencv::core::Vector;
 use crate::security;
-use crate::settings::conf;
+use crate::settings::{Settings};
 use crate::{calc, service::image::get_image};
 use actix_web::{get, HttpResponse};
 
 #[get("/{key}/{width:\\d+}x{height:\\d+}/{smart:(smart/)?}{filename:.*}")]
 pub async fn file_cv(req: HttpRequest) -> Result<HttpResponse, actix_web::Error> {
-    let key = req.match_info().get("key").unwrap();
+    Settings::start();
+
     let width = req.match_info().get("width").unwrap().parse::<i32>().unwrap();
     let height = req.match_info().get("height").unwrap().parse::<i32>().unwrap();
     let _smart: bool = req.match_info().get("smart").unwrap() == "smart/";

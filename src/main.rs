@@ -7,7 +7,7 @@ use actix_web::{App, HttpServer};
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> std::io::Result<()> {
     Settings::start();
-    println!("Settings {:?}", conf().secret_key);
+    println!("Settings {:?}", conf());
     let n_workers = num_cpus::get() * 2;
     println!("Starting server with {} workers", n_workers);
 

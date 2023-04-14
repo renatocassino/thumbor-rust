@@ -4,7 +4,7 @@ use base64::{Engine as _, engine::general_purpose};
 use thiserror::Error;
 use anyhow::Result;
 
-use crate::settings::{conf, Settings};
+use crate::settings::{conf};
 
 type HmacSha1 = Hmac<Sha1>;
 
@@ -39,6 +39,7 @@ pub fn is_valid_key(path: String) -> bool {
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq; // crate for test-only use. Cannot be used in non-test code.
+    use crate::settings::{Settings};
 
     #[test]
     fn test_get_key_by_path() {
