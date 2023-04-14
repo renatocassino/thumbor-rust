@@ -1,4 +1,5 @@
 use actix_web::HttpRequest;
+use actix_web::http::header;
 use opencv::prelude::MatTraitConstManual; // to get method `.size()` must have this use
 use opencv::{core::{Mat}};
 use opencv::core::Vector;
@@ -22,12 +23,12 @@ pub async fn file_cv(req: HttpRequest) -> Result<HttpResponse, actix_web::Error>
 
     let img = get_image(filename).await;
 
-    let original_size = img.size().unwrap();
+    let original_size = img.image.size().unwrap();
     let new_size = opencv::core::Size { width, height };
     let new_size_with_aspect = calc::get_new_size_respecting_aspect_ratio(original_size, new_size);
 
     let mut resized_image = Mat::default();
-    opencv::imgproc::resize(&img, &mut resized_image, new_size_with_aspect, 0.0, 0.0, opencv::imgproc::INTER_AREA).unwrap();
+    opencv::imgproc::resize(&img.image, &mut resized_image, new_size_with_aspect, 0.0, 0.0, opencv::imgproc::INTER_AREA).unwrap();
 
     let cropped_image = Mat::roi(&resized_image, opencv::core::Rect {
         x: ((new_size_with_aspect.width - width) / 2),
@@ -37,9 +38,11 @@ pub async fn file_cv(req: HttpRequest) -> Result<HttpResponse, actix_web::Error>
     }).unwrap();
 
     let mut out_vector: Vector<u8> = Vector::new();
-    opencv::imgcodecs::imencode(".jpg", &cropped_image, &mut out_vector, &Vector::new()).expect("Encode image");
 
+    // TODO - Change the extension to match the content type of the image
+    opencv::imgcodecs::imencode(".jpg", &cropped_image, &mut out_vector, &Vector::new()).expect("Encode image");
     Ok(HttpResponse::Ok()
-        .append_header(("Content-Type", "image/jpeg"))
+        .content_type(img.mime_type.as_str())
+        .insert_header(header::CacheControl(vec![header::CacheDirective::MaxAge(3600)]))
         .body(out_vector.to_vec()))
 }

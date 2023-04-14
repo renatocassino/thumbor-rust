@@ -2913,6 +2913,7 @@ dependencies = [
  "config",
  "hmac",
  "lazy_static",
+ "mime_guess",
  "mockito",
  "num_cpus",
  "opencv",
