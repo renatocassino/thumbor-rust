@@ -6,7 +6,7 @@ use crate::image::image_manipulator;
 use crate::url_props::UrlPropsController;
 use crate::{security, url_props};
 use crate::settings::{Settings};
-use crate::{calc, service::image::get_image};
+use crate::{service::image::get_image};
 use actix_web::{get, web, Result, HttpRequest, HttpResponse};
 
 #[get("/{key}/{width:-?\\d+}x{height:-?\\d+}{smart:(/smart)?}{halign:(/(left|right|center))?}{valign:(/(top|middle|bottom))?}/{filename:.*}")]
@@ -19,28 +19,11 @@ pub async fn file_cv(req: HttpRequest, path: web::Path<UrlPropsController>) -> R
     }
 
     let img = get_image(&url_props.filename).await;
-
     let original_size = img.image.size().unwrap();
-    let new_size = opencv::core::Size { width: url_props.width, height: url_props.height };
-    let new_aspect = calc::get_new_size_respecting_aspect_ratio(original_size, new_size);
 
     let mut final_image: Mat;
-    let mut resized_image = Mat::default();
-    opencv::imgproc::resize(
-        &img.image,
-        &mut resized_image,
-        new_aspect,
-        0.0,
-        0.0,
-        opencv::imgproc::INTER_AREA
-    ).unwrap();
-
-    final_image = Mat::roi(&resized_image, opencv::core::Rect {
-        x: ((new_aspect.width - new_size.width) / 2),
-        y: ((new_aspect.height - new_size.height) / 2),
-        width: new_size.width,
-        height: new_size.height,
-    }).unwrap();
+    let resized_image = image_manipulator::resize(&img, &url_props);
+    final_image = image_manipulator::crop(&resized_image, &url_props, original_size);
 
     if url_props.flip.horizontal {
         final_image = image_manipulator::flip_horizontal(&final_image);
