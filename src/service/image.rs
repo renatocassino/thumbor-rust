@@ -17,7 +17,7 @@ async fn load_image_from_url(filename: &mut String) -> Result<ImageWithType, Box
             .and_then(|header| header.to_str().ok())
             .unwrap_or("type/jpeg");
 
-        let image_data = resp.bytes().await?.clone().to_vec();
+        let image_data = resp.bytes().await?.to_vec();
         let mat = Mat::from_slice(&image_data)?;
         let img = opencv::imgcodecs::imdecode(&mat, opencv::imgcodecs::IMREAD_COLOR)?;
 

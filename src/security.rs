@@ -15,7 +15,7 @@ pub enum KeyError {
 }
 
 pub fn get_key_by_path(path: String) -> Result<String, KeyError> {
-    if conf().secret_key == "" {
+    if conf().secret_key.is_empty() {
         return Ok("unsafe".to_string());
     }
 

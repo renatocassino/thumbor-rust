@@ -25,7 +25,7 @@ impl Settings {
             .set_default("secret_key", "")?
             .add_source(File::with_name("config/default.toml"));
 
-        if file_config_path != "" {
+        if !file_config_path.is_empty() {
             let c = c.add_source(File::with_name(&file_config_path));
             return c.build()?.try_deserialize();
         }

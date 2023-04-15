@@ -39,9 +39,17 @@ pub fn build_url_props(uri: UrlPropsController) -> UrlProps {
         height: i32::abs(uri.height),
         filename: uri.filename,
         alignment: Alignment {
-            halign: if uri.halign == "" { "center".to_string() }  else { uri.halign.clone().replace("/", "") },
-            valign:  if uri.valign == "" { "middle".to_string() } else { uri.valign.clone().replace("/", "") },
-            smart: uri.smart.replace("/", "") == "smart" && (uri.halign == "" && uri.valign == ""),
+            halign: if uri.halign.is_empty() {
+                "center".to_string()
+            }  else {
+                uri.halign.replace('/', "")
+            },
+            valign:  if uri.valign.is_empty() {
+                "middle".to_string()
+            } else {
+                uri.valign.replace('/', "")
+            },
+            smart: uri.smart.replace('/', "") == "smart" && (uri.halign.is_empty() && uri.valign.is_empty()),
         },
         flip: FlipImage {
             horizontal: uri.width < 0,
