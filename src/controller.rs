@@ -2,7 +2,7 @@ use actix_web::http::header;
 use opencv::prelude::MatTraitConstManual; // to get method `.size()` must have this use
 use opencv::{core::{Mat}};
 use opencv::core::Vector;
-use crate::calc::new_width_when_respect_aspect_ration;
+use crate::calc::{new_width_when_respect_aspect_ration, new_height_when_respect_aspect_ration};
 use crate::image::image_manipulator;
 use crate::url_props::UrlPropsController;
 use crate::{security, url_props};
@@ -27,7 +27,7 @@ pub async fn file_cv(req: HttpRequest, path: web::Path<UrlPropsController>) -> R
     }
 
     if url_props.height == 0 {
-        url_props.height = new_width_when_respect_aspect_ration(original_size.width, original_size.height, url_props.width);
+        url_props.height = new_height_when_respect_aspect_ration(original_size.width, original_size.height, url_props.width);
     }
 
     let mut final_image: Mat;
