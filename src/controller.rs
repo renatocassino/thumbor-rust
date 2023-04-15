@@ -2,6 +2,7 @@ use actix_web::http::header;
 use opencv::prelude::MatTraitConstManual; // to get method `.size()` must have this use
 use opencv::{core::{Mat}};
 use opencv::core::Vector;
+use crate::calc::new_width_when_respect_aspect_ration;
 use crate::image::image_manipulator;
 use crate::url_props::UrlPropsController;
 use crate::{security, url_props};
@@ -13,13 +14,21 @@ use actix_web::{get, web, Result, HttpRequest, HttpResponse};
 pub async fn file_cv(req: HttpRequest, path: web::Path<UrlPropsController>) -> Result<HttpResponse, actix_web::Error> {
     Settings::start();
 
-    let url_props = url_props::build_url_props(path.into_inner());
+    let mut url_props = url_props::build_url_props(path.into_inner());
     if !security::is_valid_key(req.uri().to_string()) {
         return Ok(HttpResponse::Unauthorized().finish());
     }
 
     let img = get_image(&url_props.filename).await;
     let original_size = img.image.size().unwrap();
+
+    if url_props.width == 0 {
+        url_props.width = new_width_when_respect_aspect_ration(original_size.width, original_size.height, url_props.height);
+    }
+
+    if url_props.height == 0 {
+        url_props.height = new_width_when_respect_aspect_ration(original_size.width, original_size.height, url_props.width);
+    }
 
     let mut final_image: Mat;
     let resized_image = image_manipulator::resize(&img, &url_props);

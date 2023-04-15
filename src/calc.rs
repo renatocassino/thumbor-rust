@@ -6,6 +6,16 @@ pub fn get_aspect_ratio(width: i32, height: i32) -> f32 {
     width as f32 / height as f32
 }
 
+pub fn new_width_when_respect_aspect_ration(original_width: i32, original_height: i32, new_height: i32) -> i32 {
+    // ((original_width as f32 / original_height as f32) * new_height as f32) as i32
+    original_width * new_height / original_height
+}
+
+pub fn new_height_when_respect_aspect_ration(original_width: i32, original_height: i32, new_width: i32) -> i32 {
+    // ((original_height as f32 / original_width as f32) * new_width as f32) as i32
+    original_height * new_width / original_width
+}
+
 /**
  * Returns the new size of a rectangle respecting the aspect ratio.
  * 
