@@ -4,3 +4,4 @@ pub mod service;
 pub mod security;
 pub mod settings;
 pub mod image;
+pub mod url_props;

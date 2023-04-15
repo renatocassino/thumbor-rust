@@ -2918,6 +2918,7 @@ dependencies = [
  "num_cpus",
  "opencv",
  "pretty_assertions",
+ "regex",
  "reqwest",
  "serde",
  "sha1",

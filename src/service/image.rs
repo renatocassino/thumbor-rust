@@ -31,7 +31,6 @@ fn load_image_from_file(filename: &str) -> Result<ImageWithType, opencv::Error> 
     let img = opencv::imgcodecs::imread(&path, opencv::imgcodecs::IMREAD_COLOR)?;
     let mime = MimeGuess::from_path(path).first_or_octet_stream();
 
-    println!("Mime: {}", mime);
     Ok(ImageWithType { image: img, mime_type: mime.to_string() })
 }
 

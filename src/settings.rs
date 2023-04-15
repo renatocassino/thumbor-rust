@@ -3,6 +3,7 @@ use std::sync::{Arc, RwLock};
 use config::{Config, ConfigError, File};
 use lazy_static::lazy_static;
 use serde::Deserialize;
+use std::env;
 
 lazy_static! {
     pub static ref CONF_S: Settings = Settings::from_file().unwrap();
@@ -17,13 +18,19 @@ pub struct Settings {
 
 impl Settings {
     pub fn from_file() -> Result<Self, ConfigError> {
+        let file_config_path = env::var("CONFIG_PATH").unwrap_or("".to_string());
+
         let c = Config::builder()
             .set_default("debug", false)?
             .set_default("secret_key", "")?
-            .add_source(File::with_name("config/default.toml"))
-            .build()?;
+            .add_source(File::with_name("config/default.toml"));
 
-        c.try_deserialize()
+        if file_config_path != "" {
+            let c = c.add_source(File::with_name(&file_config_path));
+            return c.build()?.try_deserialize();
+        }
+
+        c.build()?.try_deserialize()
     }
 
     pub fn current() -> Arc<Settings> {
