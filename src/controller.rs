@@ -3,6 +3,7 @@ use actix_web::http::header;
 use opencv::prelude::MatTraitConstManual; // to get method `.size()` must have this use
 use opencv::{core::{Mat}};
 use opencv::core::Vector;
+use crate::image::image_manipulator;
 use crate::security;
 use crate::settings::{Settings};
 use crate::{calc, service::image::get_image};
@@ -27,12 +28,11 @@ pub async fn file_cv(req: HttpRequest) -> Result<HttpResponse, actix_web::Error>
     let new_size = opencv::core::Size { width: i32::abs(width), height: i32::abs(height) };
     let new_size_with_aspect = calc::get_new_size_respecting_aspect_ratio(original_size, new_size);
 
-    let mut final_image = Mat::default();
+    let mut final_image: Mat;
     let mut resized_image = Mat::default();
     opencv::imgproc::resize(&img.image, &mut resized_image, new_size_with_aspect, 0.0, 0.0, opencv::imgproc::INTER_AREA).unwrap();
 
-    // Parece que a boa é ter uma única instância de Mat e criar novas instâncias temporárias e depois sobreescrever Mat com a nova instância
-    let mut cropped_image = Mat::roi(&resized_image, opencv::core::Rect {
+    let cropped_image = Mat::roi(&resized_image, opencv::core::Rect {
         x: ((new_size_with_aspect.width - new_size.width) / 2),
         y: ((new_size_with_aspect.height - new_size.height) / 2),
         width: new_size.width,
@@ -42,16 +42,11 @@ pub async fn file_cv(req: HttpRequest) -> Result<HttpResponse, actix_web::Error>
     final_image = cropped_image;
 
     if width < 0 {
-        // flip image
-        let mut flipped_image = Mat::default();
-        opencv::core::flip(&final_image, &mut flipped_image, 1).unwrap();
-        final_image = flipped_image;
+        final_image = image_manipulator::flip_horizontal(&final_image);
     }
 
     if height < 0 {
-        let mut flipped_image = Mat::default();
-        opencv::core::flip(&final_image, &mut flipped_image, 0).unwrap();
-        final_image = flipped_image;
+        final_image = image_manipulator::flip_vertical(&final_image);
     }
 
     let mut out_vector: Vector<u8> = Vector::new();
